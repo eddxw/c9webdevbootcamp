@@ -17,7 +17,27 @@ var campgrounds = [{
     {
         name: "Mountain Goat",
         image: "https://farm8.staticflickr.com/7174/6655837043_6b4948557f.jpg"
-    }
+    },
+    {
+        name: "Salmon Creek",
+        image: "https://pixabay.com/get/e833b3092cf5033ed1584d05fb1d4e97e07ee3d21cac104491f4c571afedbcbd_340.jpg"
+    },
+    {
+        name: "Granite Hill",
+        image: "https://farm8.staticflickr.com/7368/9811937955_03d073d6ef.jpg"
+    },
+    {
+        name: "Mountain Goat",
+        image: "https://farm8.staticflickr.com/7174/6655837043_6b4948557f.jpg"
+    },
+    {
+        name: "Mountain Goat",
+        image: "https://farm8.staticflickr.com/7174/6655837043_6b4948557f.jpg"
+    },
+    {
+        name: "Salmon Creek",
+        image: "https://pixabay.com/get/e833b3092cf5033ed1584d05fb1d4e97e07ee3d21cac104491f4c571afedbcbd_340.jpg"
+    },
 ];
 
 app.get("/", (req, res) => {
