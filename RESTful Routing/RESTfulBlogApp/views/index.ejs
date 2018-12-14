@@ -6,9 +6,9 @@
         <div class="ui divided items">
             <% blogs.forEach((blog)=>{ %>
                 <div class="item">
-                    <div class="image">
+                    <a class="image" href="/blogs/<%= blog._id %>">
                         <img class="" src="<%= blog.image %>">
-                    </div>
+                    </a>
                     <div class="content">
                         <a class="header" href="/blogs/<%= blog._id %>"><%= blog.title %></a>
                         <div class="meta">
@@ -18,11 +18,12 @@
                             <p><%- blog.body.substring(0, 100) %>...</p>
                         </div>
                         <div class="extra">
-                            <a class="ui floated basic violet button" href="/blogs/<%= blog._id %>">Read More<i class="right chevron icon"></i></a>
+                            <a class="ui basic medium teal button" href="/blogs/<%= blog._id %>">
+                                 Read More
+                                 <i class="icon chevron right"></i>
+                            </a>
                         </div>
                     </div>
-                    
-                    
                 </div>
             <% })%>
         </div>
