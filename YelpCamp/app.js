@@ -31,11 +31,16 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
+app.use((req, res, next) => {
+    res.locals.currentUser = req.user;
+    next();
+});
 
 app.get("/", (req, res) => {
     res.render("landing");
 });
 
+// Index - show all campgrounds
 app.get("/campgrounds", (req, res) => {
     // Get all campground from DB
     Campground.find({}, (err, allCampgrounds) => {
@@ -43,7 +48,7 @@ app.get("/campgrounds", (req, res) => {
             console.log(err);
         }
         else {
-            res.render("campgrounds/index", { campgrounds: allCampgrounds });
+            res.render("campgrounds/index", { campgrounds: allCampgrounds, currentUser: req.user });
         }
     })
 });
