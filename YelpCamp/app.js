@@ -24,6 +24,7 @@ app.use(require("express-session")({
     resave: false,
     saveUninitialized: false
 }));
+
 app.use(passport.initialize());
 app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
@@ -143,6 +144,18 @@ app.post("/register", (req, res) => {
         });
     });
 });
+
+// Show login form
+app.get("/login", (req, res) => {
+    res.render("login");
+});
+
+// handling Login logic
+app.post("/login", passport.authenticate("local", {
+    successRedirect: "/campgrounds",
+    failureRedirect: "/login"
+}), (req, res) => {});
+
 
 app.listen(process.env.PORT, process.env.IP, () => {
     console.log("YelpCamp Server has started!!");
