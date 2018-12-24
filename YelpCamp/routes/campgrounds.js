@@ -2,16 +2,24 @@ const express = require("express");
 const router = express.Router();
 const Campground = require("../models/campground");
 const middleware = require("../middleware");
-const NodeGeocoder = require("node-geocoder");
+var NodeGeocoder = require("node-geocoder");
 
-const options = {
+var options = {
     provider: 'google',
     httpAdapter: 'https',
     apiKey: process.env.GEOCODER_API_KEY,
     formatter: null
 };
 
-const geocoder = NodeGeocoder(options);
+// console.log(options);
+
+// var geocoder = NodeGeocoder(options);
+
+let geo = require('mapbox-geocoding');
+
+geo.setAccessToken(process.env.MAPBOX_GEOCODING_API_KEY);
+
+
 
 // Index - show all campgrounds
 router.get("/", (req, res) => {
@@ -36,17 +44,28 @@ router.post("/", middleware.isLoggedIn, (req, res) => {
         id: req.user._id,
         username: req.user.username
     }
-    const newCampground = { name: name, price: price, image: image, description: desc, author: author };
-
-    // Create a new campground and save to DB
-    Campground.create(newCampground, (err, newlyCreated) => {
+    geo.geocode('mapbox.places', req.body.location, function(err, geoData) {
         if (err) {
-            console.log(err);
+            console.log(req.body.location, geoData);
+            req.flash('error', 'Invalid address');
+            return res.redirect('back');
         }
-        else {
-            // console.log(newlyCreated);
-            res.redirect("/campgrounds");
-        }
+        var foundLocation = geoData.features[0];
+        var lat = foundLocation.geometry.coordinates[0];
+        var lng = foundLocation.geometry.coordinates[1];
+        var location = foundLocation.place_name;
+        var newCampground = { name: name, price: price, image: image, description: desc, author: author, location: location, lat: lat, lng: lng };
+
+        // Create a new campground and save to DB
+        Campground.create(newCampground, function(err, newlyCreated) {
+            if (err) {
+                console.log(err);
+            }
+            else {
+                //redirect back to campgrounds page
+                res.redirect("/campgrounds");
+            }
+        });
     });
 });
 
@@ -72,22 +91,38 @@ router.get("/:id", (req, res) => {
 // Edit campground route
 router.get("/:id/edit", middleware.checkCampgroundOwnership, (req, res) => {
     Campground.findById(req.params.id, (err, foundCampground) => {
-        
+
         res.render("campgrounds/edit", { campground: foundCampground });
     });
 });
 // Update campground route
 router.put("/:id", middleware.checkCampgroundOwnership, (req, res) => {
-    // find and update campground
-    Campground.findByIdAndUpdate(req.params.id, req.body.campground, (err, updatedCampground) => {
+
+    geo.geocode('mapbox.places', req.body.campground.location, function(err, geoData) {
         if (err) {
-            res.redirect("/campgrounds");
+            console.log(req.body.campground.location, geoData);
+            req.flash('error', 'Invalid address');
+            return res.redirect('back');
         }
-        else {
-            res.redirect(`/campgrounds/${req.params.id}`);
-        }
+        var foundLocation = geoData.features[0];
+        var lat = foundLocation.geometry.coordinates[0];
+        var lng = foundLocation.geometry.coordinates[1];
+        var location = foundLocation.place_name;
+        
+        var campground = req.body.campground;
+        var newData = { name: campground.name, price: campground.price, image: campground.image, description: campground.description, location: location, lat: lat, lng: lng };
+        console.log(newData);
+        Campground.findByIdAndUpdate(req.params.id, { $set: newData }, function(err, campground) {
+            if (err) {
+                req.flash("error", err.message);
+                res.redirect("back");
+            }
+            else {
+                req.flash("success", "Successfully Updated!");
+                res.redirect("/campgrounds/" + campground._id);
+            }
+        });
     });
-    // redirect
 });
 
 // Destroy campground Route

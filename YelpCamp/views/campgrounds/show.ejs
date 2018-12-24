@@ -1,5 +1,10 @@
 <% include ../partials/header %>
-<div class="container">
+<script src='https://api.mapbox.com/mapbox.js/v3.1.1/mapbox.js'></script>
+<link href='https://api.mapbox.com/mapbox.js/v3.1.1/mapbox.css' rel='stylesheet' />
+<script src='https://api.mapbox.com/mapbox-gl-js/v0.52.0/mapbox-gl.js'></script>
+<link href='https://api.mapbox.com/mapbox-gl-js/v0.52.0/mapbox-gl.css' rel='stylesheet' />
+
+<div class="container-fluid campshow">
     <div class="row">
         <div class="col-md-3">
             <p class="lead">YelpCamp</p>
@@ -60,32 +65,24 @@
 </div>
 
 <script>
-  function initMap() {
-    var lat = <%= campground.lat %>;
-    var lng = <%= campground.lng %>;
-    var center = {lat: lat, lng: lng };
-    var map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 8,
-        center: center,
-        scrollwheel: false
-    });
-    var contentString = `
-      <strong><%= campground.name %><br />
-      <%= campground.location %></strong>
-      <p><%= campground.description %></p>
-    `
-    var infowindow = new google.maps.InfoWindow({
-      content: contentString
-    });
-    var marker = new google.maps.Marker({
-        position: center,
-        map: map
-    });
-    marker.addListener('click', function() {
-      infowindow.open(map, marker);
-    });
-  }
-</script>
-<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB_jr6swXAXF6JufTaD_WI5XrNabdJsLqQ&callback=initMap"></script>
+L.mapbox.accessToken = "<%= process.env.MAPBOX_GEOCODING_API_KEY %>";
+// var map = L.mapbox.map('map', 'mapbox.streets')
+//     .setView([<%=campground.lng%>, <%=campground.lat%>], 17);
+    
+mapboxgl.accessToken = "<%= process.env.MAPBOX_GEOCODING_API_KEY %>";
+var map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/streets-v11',
+    // style: 'mapbox://styles/mapbox/satellite-streets-v9',
+    center: [<%=campground.lat%>, <%=campground.lng%>], // starting position
+    zoom: 15 // starting zoom
+});
+        
+// Add zoom and rotation controls to the map.
+map.addControl(new mapboxgl.NavigationControl());
 
+
+
+</script>
+<!--mapbox://styles/mapbox/satellite-streets-v9-->
 <% include ../partials/footer %>
