@@ -23,15 +23,31 @@ geo.setAccessToken(process.env.MAPBOX_GEOCODING_API_KEY);
 
 // Index - show all campgrounds
 router.get("/", (req, res) => {
-    // Get all campground from DB
-    Campground.find({}, (err, allCampgrounds) => {
-        if (err) {
-            console.log(err);
-        }
-        else {
-            res.render("campgrounds/index", { campgrounds: allCampgrounds });
-        }
-    })
+    if (req.query.search) {
+        const regex = new RegExp(escapeRegex(req.query.search), 'gi');
+
+        Campground.find({ name: regex }, (err, allCampgrounds) => {
+            if (err) {
+                console.log(err);
+            }
+            else {
+                if (allCampgrounds.length < 1) {
+                    req.flash("error", "No campgrounds found");
+                }
+                res.render("campgrounds/index", { campgrounds: allCampgrounds });
+            }
+        });
+    }
+    else {
+        Campground.find({}, (err, allCampgrounds) => {
+            if (err) {
+                console.log(err);
+            }
+            else {
+                res.render("campgrounds/index", { campgrounds: allCampgrounds });
+            }
+        });
+    }
 });
 
 // Create
@@ -108,7 +124,7 @@ router.put("/:id", middleware.checkCampgroundOwnership, (req, res) => {
         var lat = foundLocation.geometry.coordinates[0];
         var lng = foundLocation.geometry.coordinates[1];
         var location = foundLocation.place_name;
-        
+
         var campground = req.body.campground;
         var newData = { name: campground.name, price: campground.price, image: campground.image, description: campground.description, location: location, lat: lat, lng: lng };
         console.log(newData);
@@ -136,5 +152,9 @@ router.delete("/:id", middleware.checkCampgroundOwnership, (req, res) => {
         }
     });
 });
+
+function escapeRegex(text) {
+    return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+};
 
 module.exports = router;
