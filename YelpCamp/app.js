@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express"),
     app = express(),
     bodyParser = require("body-parser"),
@@ -8,7 +9,6 @@ const express = require("express"),
     methodOverride = require("method-override"),
     User = require("./models/user"),
     seedDB = require("./seeds");
-
 
 // requiring routes
 const commentRoutes = require("./routes/comments"),
